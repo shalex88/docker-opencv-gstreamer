@@ -1,0 +1,7 @@
+services:
+  opencv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: opencv4.x-ubuntu24-gstreamer:latest
+    container_name: opencv-gstreamer
