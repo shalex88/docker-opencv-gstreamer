@@ -1,5 +1,8 @@
+# Define the Ubuntu versions as a build argument
+ARG UBUNTU_VER=24.04
+
 # Use the official Ubuntu 24.04 image as the base
-FROM ubuntu:24.04
+FROM ubuntu:${UBUNTU_VER}
 
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,9 +34,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Define the OpenCV versions as a build argument
+ARG OPENCV_VER=4.11.0
+
 # Clone the OpenCV and OpenCV contrib repositories
-RUN git clone https://github.com/opencv/opencv.git -b 4.x /opencv && \
-    git clone https://github.com/opencv/opencv_contrib.git -b 4.x /opencv_contrib
+RUN git clone https://github.com/opencv/opencv.git -b ${OPENCV_VER} /opencv && \
+    git clone https://github.com/opencv/opencv_contrib.git -b ${OPENCV_VER} /opencv_contrib
 
 # Create a build directory and compile OpenCV with GStreamer and Python support
 RUN cd /opencv && mkdir build && cd build && \
@@ -52,6 +58,30 @@ RUN cd /opencv && mkdir build && cd build && \
 
 # Clean up
 RUN rm -rf /opencv /opencv_contrib
+
+# Additional GStreamer packages that are not required by OpenCV but are useful for video processing
+RUN apt-get update && apt-get install -y \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
+    gstreamer1.0-alsa \
+    gstreamer1.0-gl \
+    gstreamer1.0-gtk3 \
+    gstreamer1.0-qt5 \
+    gstreamer1.0-pulseaudio \
+    gstreamer1.0-rtsp \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the startup directory
+WORKDIR /root
+
+# Set the prompt hostname
+ENV HOSTNAME=opencv-${OPENCV_VER}-container
 
 # Set the default command to run a bash shell
 CMD ["bash"]
