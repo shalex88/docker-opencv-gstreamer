@@ -27,12 +27,14 @@ RUN apt-get update && apt-get install -y \
     openexr \
     libatlas-base-dev \
     python3-dev \
-    python3-numpy \
     python3-pip \
     libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+RUN python3 -m pip install numpy
 
 # Define the OpenCV versions as a build argument
 ARG OPENCV_VER=4.11.0
@@ -77,11 +79,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+ENV HOSTNAME=opencv-${OPENCV_VER}-container
+# Set the shell prompt to use the HOSTNAME environment variable
+RUN echo "export PS1='\[\033[01;32m\]\u@\${HOSTNAME}:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
+
 # Set the startup directory
 WORKDIR /root
-
-# Set the prompt hostname
-ENV HOSTNAME=opencv-${OPENCV_VER}-container
 
 # Set the default command to run a bash shell
 CMD ["bash"]
