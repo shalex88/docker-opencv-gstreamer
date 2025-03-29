@@ -1,8 +1,8 @@
 # Define the Ubuntu versions as a build argument
 ARG UBUNTU_VER=24.04
 
-# Use the official Ubuntu 24.04 image as the base
-FROM ubuntu:${UBUNTU_VER}
+# Use Nvidia Ubuntu 24.04 image as the base
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu${UBUNTU_VER}
 
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -52,6 +52,12 @@ RUN cmake -S /opencv -B /opencv/build \
     -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
     -D WITH_GSTREAMER=ON \
     -D OPENCV_GENERATE_PKGCONFIG=ON \
+    -D WITH_CUDA=ON \
+    -D CUDA_ARCH_PTX=6.1 \
+    -D ENABLE_FAST_MATH=ON \
+    -D CUDA_FAST_MATH=ON \
+    -D WITH_CUBLAS=ON \
+    -D OPENCV_DNN_CUDA=ON \
     -D PYTHON_EXECUTABLE=$(which python3) && \
     cmake --build /opencv/build --parallel $(nproc) && \
     cmake --install /opencv/build && \
