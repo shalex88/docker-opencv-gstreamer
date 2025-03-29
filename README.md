@@ -35,5 +35,8 @@ docker pull shalex88/opencv-4.8
 ## Run
 
 ```bash
-docker run -it --rm opencv-4.11
+docker run -it --rm shalex88/opencv-4.11:latest
+# Run with GUI support
+docker run -it --rm -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix shalex88/opencv-4.11:latest
+
 ```
