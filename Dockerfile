@@ -13,6 +13,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     git \
     gfortran \
+    gstreamer1.0-alsa \
+    gstreamer1.0-gl \
+    gstreamer1.0-gtk3 \
+    gstreamer1.0-libav \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-pulseaudio \
+    gstreamer1.0-python3-plugin-loader \
+    gstreamer1.0-qt5 \
+    gstreamer1.0-rtsp \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
     libatlas-base-dev \
     libavcodec-dev \
     libavformat-dev \
@@ -29,6 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openexr \
     pkg-config \
     python3-dev \
+    python3-gst-1.0 \
     python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -65,23 +80,6 @@ RUN cmake -S /opencv -B /opencv/build \
 
 # Clean up
 RUN rm -rf /opencv /opencv_contrib
-
-# Additional GStreamer packages that are not required by OpenCV but are useful for video processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gstreamer1.0-alsa \
-    gstreamer1.0-gl \
-    gstreamer1.0-gtk3 \
-    gstreamer1.0-libav \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-ugly \
-    gstreamer1.0-pulseaudio \
-    gstreamer1.0-qt5 \
-    gstreamer1.0-rtsp \
-    gstreamer1.0-tools \
-    gstreamer1.0-x \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set the shell prompt to use the HOSTNAME environment variable
 ENV HOSTNAME=opencv-${OPENCV_VER}-container

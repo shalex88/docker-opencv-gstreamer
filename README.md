@@ -8,13 +8,9 @@ Docker image with different OpenCV (with Gstreamer) and Ubuntu versions combinat
 
     [shalex88/opencv-4.8](https://hub.docker.com/r/shalex88/opencv-4.8)
 
-* OpenCV 4.11.0 with Python 3.12.3, Gstreamer 1.24.2 support on Ubuntu 24.04 (amd64, arm64)
-
-    [shalex88/opencv-4.11](https://hub.docker.com/r/shalex88/opencv-4.11)
-
 * OpenCV 4.11.0 with Cuda 12.8.1, cuDNN 9.8.0, Python 3.12.3, Gstreamer 1.24.2 support on Ubuntu 24.04 (amd64, arm64)
 
-    [shalex88/opencv-cuda-4.11](https://hub.docker.com/r/shalex88/opencv-cuda-4.11)
+    [shalex88/opencv-4.11](https://hub.docker.com/r/shalex88/opencv-4.11)
 
 ## Build
 
@@ -40,5 +36,5 @@ docker pull shalex88/opencv-4.8
 ```bash
 docker run -it --rm shalex88/opencv-4.11
 # Run with GUI support
-docker run -it --rm -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix shalex88/opencv-4.11
+docker run -it --rm -e DISPLAY=${DISPLAY} -v /tmp/.X11-unix:/tmp/.X11-unix shalex88/opencv-4.11
 ```
