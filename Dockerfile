@@ -1,8 +1,10 @@
 # Define the Ubuntu versions as a build argument
 ARG UBUNTU_VER=24.04
 
-# Use Nvidia Ubuntu 24.04 image as the base
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu${UBUNTU_VER}
+# Select the base image
+ARG CUDA=ubuntu:
+ARG BASE_IMAGE=${CUDA}${UBUNTU_VER}
+FROM ${BASE_IMAGE}
 
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -58,6 +60,12 @@ ARG OPENCV_VER=4.11.0
 RUN git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv.git /opencv && \
     git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv_contrib.git /opencv_contrib
 
+# Set CUDA flags if CUDA is enabled:
+ENV CUDA_FLAGS=""
+RUN if [ "${CUDA}" != "ubuntu:" ]; then \
+    CUDA_FLAGS="-D WITH_CUDA=ON -D CUDA_ARCH_PTX=6.1 -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON -D WITH_CUBLAS=ON -D OPENCV_DNN_CUDA=ON"; \
+fi
+
 # Create a build directory and compile OpenCV with GStreamer and Python support
 RUN cmake -S /opencv -B /opencv/build \
     -D CMAKE_BUILD_TYPE=Release \
@@ -67,12 +75,7 @@ RUN cmake -S /opencv -B /opencv/build \
     -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
     -D WITH_GSTREAMER=ON \
     -D OPENCV_GENERATE_PKGCONFIG=ON \
-    -D WITH_CUDA=ON \
-    -D CUDA_ARCH_PTX=6.1 \
-    -D ENABLE_FAST_MATH=ON \
-    -D CUDA_FAST_MATH=ON \
-    -D WITH_CUBLAS=ON \
-    -D OPENCV_DNN_CUDA=ON \
+    ${CUDA_FLAGS} \
     -D PYTHON_EXECUTABLE=$(which python3) && \
     cmake --build /opencv/build --parallel $(nproc) && \
     cmake --install /opencv/build && \
