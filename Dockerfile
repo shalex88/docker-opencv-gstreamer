@@ -1,8 +1,10 @@
 # Define the Ubuntu versions as a build argument
 ARG UBUNTU_VER=24.04
 
-# Use the official Ubuntu 24.04 image as the base
-FROM ubuntu:${UBUNTU_VER}
+# Select the base image
+ARG CUDA=ubuntu:
+ARG BASE_IMAGE=${CUDA}${UBUNTU_VER}
+FROM ${BASE_IMAGE}
 
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,6 +15,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     git \
     gfortran \
+    gstreamer1.0-alsa \
+    gstreamer1.0-gl \
+    gstreamer1.0-gtk3 \
+    gstreamer1.0-libav \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-pulseaudio \
+    gstreamer1.0-python3-plugin-loader \
+    gstreamer1.0-qt5 \
+    gstreamer1.0-rtsp \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
     libatlas-base-dev \
     libavcodec-dev \
     libavformat-dev \
@@ -29,6 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openexr \
     pkg-config \
     python3-dev \
+    python3-gst-1.0 \
     python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -43,6 +60,12 @@ ARG OPENCV_VER=4.11.0
 RUN git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv.git /opencv && \
     git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv_contrib.git /opencv_contrib
 
+# Set CUDA flags if CUDA is enabled:
+ENV CUDA_FLAGS=""
+RUN if [ "${CUDA}" != "ubuntu:" ]; then \
+    CUDA_FLAGS="-D WITH_CUDA=ON -D CUDA_ARCH_PTX=6.1 -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON -D WITH_CUBLAS=ON -D OPENCV_DNN_CUDA=ON"; \
+fi
+
 # Create a build directory and compile OpenCV with GStreamer and Python support
 RUN cmake -S /opencv -B /opencv/build \
     -D CMAKE_BUILD_TYPE=Release \
@@ -52,6 +75,7 @@ RUN cmake -S /opencv -B /opencv/build \
     -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
     -D WITH_GSTREAMER=ON \
     -D OPENCV_GENERATE_PKGCONFIG=ON \
+    ${CUDA_FLAGS} \
     -D PYTHON_EXECUTABLE=$(which python3) && \
     cmake --build /opencv/build --parallel $(nproc) && \
     cmake --install /opencv/build && \
@@ -59,23 +83,6 @@ RUN cmake -S /opencv -B /opencv/build \
 
 # Clean up
 RUN rm -rf /opencv /opencv_contrib
-
-# Additional GStreamer packages that are not required by OpenCV but are useful for video processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gstreamer1.0-alsa \
-    gstreamer1.0-gl \
-    gstreamer1.0-gtk3 \
-    gstreamer1.0-libav \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-ugly \
-    gstreamer1.0-pulseaudio \
-    gstreamer1.0-qt5 \
-    gstreamer1.0-rtsp \
-    gstreamer1.0-tools \
-    gstreamer1.0-x \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set the shell prompt to use the HOSTNAME environment variable
 ENV HOSTNAME=opencv-${OPENCV_VER}-container
