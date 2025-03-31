@@ -20,7 +20,7 @@ Docker image with different OpenCV (with Gstreamer) and Ubuntu versions combinat
 
     [shalex88/opencv-cuda-4.11](https://hub.docker.com/r/shalex88/opencv-cuda-4.11)
 
-## Build
+## Manual Build
 
 ```bash
 # Build default versions (Ubuntu 24.04, OpenCV 4.11.0)
