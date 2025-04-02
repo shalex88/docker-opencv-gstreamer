@@ -64,8 +64,11 @@ RUN git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv.
 ENV CUDA_FLAGS=""
 RUN if [ "${CUDA}" != "ubuntu:" ]; then \
     CUDA_FLAGS="-D WITH_CUDA=ON -D CUDA_ARCH_PTX=6.1 -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON -D WITH_CUBLAS=ON -D OPENCV_DNN_CUDA=ON"; \
-fi && \
-cmake -S /opencv -B /opencv/build \
+    echo "CUDA_FLAGS=${CUDA_FLAGS}" >> /etc/environment; \
+fi
+
+# Configure and build OpenCV
+RUN cmake -S /opencv -B /opencv/build \
     -D CMAKE_BUILD_TYPE=Release \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D BUILD_EXAMPLES=OFF \
