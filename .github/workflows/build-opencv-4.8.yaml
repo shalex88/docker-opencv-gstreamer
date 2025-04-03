@@ -1,9 +1,7 @@
-name: Build and Push Docker Images
+name: Build and Push opencv-4.8
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build-and-push:
