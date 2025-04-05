@@ -60,27 +60,26 @@ ARG OPENCV_VER=4.11.0
 RUN git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv.git /opencv && \
     git clone --depth 1 --branch ${OPENCV_VER} https://github.com/opencv/opencv_contrib.git /opencv_contrib
 
-# Set CUDA flags if CUDA is enabled:
-ENV CUDA_FLAGS=""
-RUN if [ "${CUDA}" != "ubuntu:" ]; then \
-    CUDA_FLAGS="-D WITH_CUDA=ON -D CUDA_ARCH_PTX=6.1 -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON -D WITH_CUBLAS=ON -D OPENCV_DNN_CUDA=ON"; \
-    echo "CUDA_FLAGS=${CUDA_FLAGS}" >> /etc/environment; \
-fi
-
 # Configure and build OpenCV
-RUN cmake -S /opencv -B /opencv/build \
+RUN if [ "${CUDA}" != "ubuntu:" ]; then \
+    CUDA_FLAGS="-D WITH_CUDA=ON -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON -D WITH_CUBLAS=ON -D OPENCV_DNN_CUDA=ON"; \
+else \
+    CUDA_FLAGS=""; \
+fi && \
+cmake -S /opencv -B /opencv/build \
+    ${CUDA_FLAGS} \
     -D CMAKE_BUILD_TYPE=Release \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D BUILD_EXAMPLES=OFF \
     -D BUILD_TESTS=OFF \
+    -D BUILD_PERF_TESTS=OFF \
     -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
     -D WITH_GSTREAMER=ON \
     -D OPENCV_GENERATE_PKGCONFIG=ON \
-    ${CUDA_FLAGS} \
     -D PYTHON_EXECUTABLE=$(which python3) && \
-    cmake --build /opencv/build --parallel $(nproc) && \
-    cmake --install /opencv/build && \
-    ldconfig
+cmake --build /opencv/build --parallel $(nproc) && \
+cmake --install /opencv/build && \
+ldconfig
 
 # Clean up
 RUN rm -rf /opencv /opencv_contrib
